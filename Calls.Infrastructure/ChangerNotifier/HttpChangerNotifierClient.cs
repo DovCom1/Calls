@@ -9,26 +9,18 @@ using Microsoft.Extensions.Logging;
 
 namespace Calls.Infrastructure.ChangerNotifier;
 
-public class HttpChangerNotifierClient : IChangerNotifierClient
+public class HttpChangerNotifierClient(
+    HttpClient httpClient,
+    ILogger<HttpChangerNotifierClient> logger) : IChangerNotifierClient
 {
-    private readonly HttpClient _httpClient;
-    private readonly ILogger<HttpChangerNotifierClient> _logger;
     const string requestUri = "/api/signaling";
-
-    public HttpChangerNotifierClient(
-        HttpClient httpClient,
-        ILogger<HttpChangerNotifierClient> logger)
-    {
-        _httpClient = httpClient;
-        _logger = logger;
-    }
 
     public async Task NotifyAsync(ChangerNotifierEnvelope envelope, CancellationToken cancellationToken = default)
     {
-        _logger.LogDebug("Sending signaling message to CN {BaseAddress}{Path} for recipient {RecipientId}",
-            _httpClient.BaseAddress, requestUri, envelope.RecipientId);
+        logger.LogDebug("Sending signaling message to CN {BaseAddress}{Path} for recipient {RecipientId}",
+            httpClient.BaseAddress, requestUri, envelope.RecipientId);
 
-        using var response = await _httpClient.PostAsJsonAsync(requestUri, envelope, cancellationToken);
+        using var response = await httpClient.PostAsJsonAsync(requestUri, envelope, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {

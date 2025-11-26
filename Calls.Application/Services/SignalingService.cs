@@ -12,21 +12,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Calls.Application.Services;
 
-public class SignalingService : ISignalingService
+public class SignalingService(
+    IRoomRepository roomRepository,
+    IChangerNotifierClient changerNotifierClient,
+    ILogger<SignalingService> logger) : ISignalingService
 {
-    private readonly IRoomRepository _roomRepository;
-    private readonly IChangerNotifierClient _changerNotifierClient;
-    private readonly ILogger<SignalingService> _logger;
-
-    public SignalingService(
-        IRoomRepository roomRepository,
-        IChangerNotifierClient changerNotifierClient,
-        ILogger<SignalingService> logger)
-    {
-        _roomRepository = roomRepository;
-        _changerNotifierClient = changerNotifierClient;
-        _logger = logger;
-    }
 
     public async Task HandleAsync(SignalingMessageRequest request, CancellationToken cancellationToken = default)
     {
@@ -90,7 +80,7 @@ public class SignalingService : ISignalingService
         var room = await GetRoomOrThrowAsync(request, cancellationToken);
         var participantAdded = room.AddParticipant(request.From);
         if (participantAdded)
-            await _roomRepository.UpdateAsync(room);
+            await roomRepository.UpdateAsync(room);
 
         var recipients = room.Participants
             .Select(p => p.UserId)
@@ -105,14 +95,14 @@ public class SignalingService : ISignalingService
         var room = await GetRoomOrThrowAsync(request, cancellationToken);
         var removed = room.RemoveParticipant(request.From);
         if (removed)
-            await _roomRepository.UpdateAsync(room);
+            await roomRepository.UpdateAsync(room);
 
         var recipients = room.Participants
             .Select(p => p.UserId)
             .Where(userId => userId != request.From)
             .ToList();
 
-        await ForwardToRecipientAsync(request, recipients, cancellationToken, room);
+            await ForwardToRecipientAsync(request, recipients, cancellationToken, room);
     }
 
     private async Task BroadcastToRoomAsync(SignalingMessageRequest request, bool includeSender, CancellationToken cancellationToken)
@@ -138,7 +128,7 @@ public class SignalingService : ISignalingService
 
         foreach (var envelope in envelopePipelines)
         {
-            await _changerNotifierClient.NotifyAsync(envelope, cancellationToken);
+            await changerNotifierClient.NotifyAsync(envelope, cancellationToken);
         }
     }
 
@@ -188,10 +178,10 @@ public class SignalingService : ISignalingService
         if (roomId == null || roomId == Guid.Empty)
             throw new ArgumentException("Room identifier is required in payload.", nameof(request.Payload.RoomInfo));
 
-        var room = await _roomRepository.GetByIdAsync(roomId.Value);
+        var room = await roomRepository.GetByIdAsync(roomId.Value);
         if (room == null)
         {
-            _logger.LogWarning("Room {RoomId} was not found for signaling message {Type}.", roomId, request.Type);
+            logger.LogWarning("Room {RoomId} was not found for signaling message {Type}.", roomId, request.Type);
             throw new KeyNotFoundException($"Room {roomId} not found.");
         }
 

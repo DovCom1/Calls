@@ -8,14 +8,8 @@ namespace Calls.Api.Controllers;
 
 [ApiController]
 [Route("api/signaling")]
-public class SignalingController : ControllerBase
+public class SignalingController(ISignalingService signalingService) : ControllerBase
 {
-    private readonly ISignalingService _signalingService;
-
-    public SignalingController(ISignalingService signalingService)
-    {
-        _signalingService = signalingService;
-    }
 
     [HttpPost]
     public async Task<IActionResult> HandleMessage([FromBody] SignalingMessageRequest request, CancellationToken cancellationToken)
@@ -25,7 +19,7 @@ public class SignalingController : ControllerBase
 
         try
         {
-            await _signalingService.HandleAsync(request, cancellationToken);
+            await signalingService.HandleAsync(request, cancellationToken);
             return Ok();
         }
         catch (KeyNotFoundException)
