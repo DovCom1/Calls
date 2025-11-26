@@ -1,0 +1,20 @@
+version: "3.9"
+
+services:
+  calls-api:
+    build:
+      context: .
+      dockerfile: Calls.Api/Dockerfile
+    environment:
+      - ChangerNotifier__BaseAddress=http://changer-notifier:5001
+    ports:
+      - "5000:8080"
+    depends_on:
+      - changer-notifier
+
+  changer-notifier:
+    image: changer-notifier:latest
+    container_name: changer-notifier
+    ports:
+      - "5001:5001"
+
