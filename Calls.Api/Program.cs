@@ -10,7 +10,6 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Настройка логирования в консоль
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
@@ -34,21 +33,18 @@ builder.Services.AddHttpClient<IChangerNotifierClient, HttpChangerNotifierClient
     client.BaseAddress = new Uri(baseAddress);
 });
 
-// Настройка Entity Framework Core с PostgreSQL
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
     ?? "Host=localhost;Port=5432;Database=CallsDb;Username=postgres;Password=postgres";
 
 builder.Services.AddDbContext<CallsDbContext>(options =>
     options.UseNpgsql(connectionString));
 
-// Регистрация репозиториев и сервисов
 builder.Services.AddScoped<IRoomRepository, EfRoomRepository>();
 builder.Services.AddScoped<IRoomService, RoomService>();
 builder.Services.AddScoped<ISignalingService, SignalingService>();
 
 var app = builder.Build();
 
-// Применение миграций при старте приложения (только для разработки)
 if (app.Environment.IsDevelopment())
 {
     using (var scope = app.Services.CreateScope())

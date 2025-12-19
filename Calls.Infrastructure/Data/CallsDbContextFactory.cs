@@ -9,10 +9,7 @@ public class CallsDbContextFactory : IDesignTimeDbContextFactory<CallsDbContext>
     {
         var optionsBuilder = new DbContextOptionsBuilder<CallsDbContext>();
         
-        // Используем connection string по умолчанию для разработки
-        // В продакшене будет использоваться строка из конфигурации
-        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
-            ?? "Host=localhost;Port=5432;Database=CallsDb;Username=postgres;Password=postgres";
+        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
         
         optionsBuilder.UseNpgsql(connectionString);
 
