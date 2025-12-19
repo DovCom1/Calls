@@ -25,7 +25,7 @@ public class HttpChangerNotifierClient(
         if (!response.IsSuccessStatusCode)
         {
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
-            _logger.LogWarning(
+            logger.LogWarning(
                 "ChangerNotifier returned non-success status code {StatusCode}. Content: {Content}",
                 (int)response.StatusCode,
                 content);
