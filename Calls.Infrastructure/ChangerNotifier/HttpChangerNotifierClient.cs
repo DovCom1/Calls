@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Calls.Application.Extensions;
 using Calls.Application.Interfaces.External;
 using Calls.Application.Notifications;
 using Microsoft.Extensions.Logging;
@@ -20,7 +21,7 @@ public class HttpChangerNotifierClient(
         logger.LogDebug("Sending signaling message to CN {BaseAddress}{Path} for recipient {RecipientId}",
             httpClient.BaseAddress, requestUri, envelope.RecipientId);
 
-        using var response = await httpClient.PostAsJsonAsync(requestUri, envelope, cancellationToken);
+        using var response = await httpClient.PostAsJsonAsync(requestUri, envelope.ToCallEventDto(), cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {
