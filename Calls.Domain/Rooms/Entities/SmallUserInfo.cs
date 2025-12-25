@@ -1,6 +1,6 @@
 namespace Calls.Domain.Rooms;
 
-// bokk добавить smallUserInfo
+// добавить smallUserInfo
 public class SmallUserInfo
 {
 }

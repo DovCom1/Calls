@@ -4,17 +4,25 @@ services:
   calls-api:
     build:
       context: .
-      dockerfile: Calls.Api/Dockerfile
+      dockerfile: Dockerfile
     environment:
       - ChangerNotifier__BaseAddress=http://changer-notifier:5001
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=CallsDb;Username=postgres;Password=postgres
     ports:
       - "5000:8080"
     depends_on:
-      - changer-notifier
+      - postgres
 
-  changer-notifier:
-    image: changer-notifier:latest
-    container_name: changer-notifier
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: CallsDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
-      - "5001:5001"
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
+volumes:
+  postgres_data:

@@ -24,6 +24,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddHttpClient<IChangerNotifierClient, HttpChangerNotifierClient>((sp, client) =>
 {
+    // Подставить нормально CN
     var configuration = sp.GetRequiredService<IConfiguration>();
     var baseAddress =
         configuration["ChangerNotifier__BaseAddress"] ??
@@ -33,8 +34,7 @@ builder.Services.AddHttpClient<IChangerNotifierClient, HttpChangerNotifierClient
     client.BaseAddress = new Uri(baseAddress);
 });
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? "Host=localhost;Port=5432;Database=CallsDb;Username=postgres;Password=postgres";
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<CallsDbContext>(options =>
     options.UseNpgsql(connectionString));
@@ -45,17 +45,14 @@ builder.Services.AddScoped<ISignalingService, SignalingService>();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+using (var scope = app.Services.CreateScope())
 {
-    using (var scope = app.Services.CreateScope())
-    {
-        var dbContext = scope.ServiceProvider.GetRequiredService<CallsDbContext>();
-        dbContext.Database.Migrate();
-    }
-    
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    var dbContext = scope.ServiceProvider.GetRequiredService<CallsDbContext>();
+    dbContext.Database.Migrate();
 }
+    
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.MapControllers();
 

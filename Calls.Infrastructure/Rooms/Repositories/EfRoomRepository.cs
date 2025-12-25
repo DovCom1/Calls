@@ -51,24 +51,20 @@ public class EfRoomRepository : IRoomRepository
             throw new InvalidOperationException($"Room with id {room.RoomId} not found");
         }
 
-        // Обновляем название через рефлексию (так как setter приватный)
         var nameProperty = typeof(Room).GetProperty(nameof(Room.Name));
         if (nameProperty != null)
         {
             nameProperty.SetValue(existingRoom, room.Name);
         }
 
-        // Обновляем участников: находим разницу и применяем через методы домена
         var existingParticipantUserIds = existingRoom.Participants.Select(p => p.UserId).ToHashSet();
         var newParticipantUserIds = room.Participants.Select(p => p.UserId).ToHashSet();
 
-        // Удаляем участников, которых больше нет
         foreach (var userId in existingParticipantUserIds.Except(newParticipantUserIds))
         {
             existingRoom.RemoveParticipant(userId);
         }
 
-        // Добавляем новых участников
         foreach (var userId in newParticipantUserIds.Except(existingParticipantUserIds))
         {
             existingRoom.AddParticipant(userId);

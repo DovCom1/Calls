@@ -28,7 +28,7 @@ public class SignalingService(
                 await HandleRoomJoinAsync(request, cancellationToken);
                 break;
             case SignalingMessageType.RoomInvite:
-                await ForwardToRecipientAsync(request, new[] { request.To!.Value }, cancellationToken);
+                await ForwardToRecipientAsync(request, [ request.To!.Value ], cancellationToken);
                 break;
             case SignalingMessageType.RoomLeave:
                 await HandleRoomLeaveAsync(request, cancellationToken);
@@ -102,7 +102,7 @@ public class SignalingService(
             .Where(userId => userId != request.From)
             .ToList();
 
-            await ForwardToRecipientAsync(request, recipients, cancellationToken, room);
+       await ForwardToRecipientAsync(request, recipients, cancellationToken, room);
     }
 
     private async Task BroadcastToRoomAsync(SignalingMessageRequest request, bool includeSender, CancellationToken cancellationToken)

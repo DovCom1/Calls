@@ -9,7 +9,7 @@ public class CallsDbContextFactory : IDesignTimeDbContextFactory<CallsDbContext>
     {
         var optionsBuilder = new DbContextOptionsBuilder<CallsDbContext>();
         
-        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
+        var connectionString = Environment.GetEnvironmentVariable("DefaultConnection");
         
         optionsBuilder.UseNpgsql(connectionString);
 
